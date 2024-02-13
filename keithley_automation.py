@@ -1,8 +1,6 @@
 # -*- coding: utf-8 -*-
 """
-Created on Thu Feb  8 11:20:58 2024
-
-@author: David
+Script to automate current value reading from Keithley Picoammeter 6485
 """
 
 import serial
@@ -23,7 +21,7 @@ print(ser)
 # reset device to default settings and zero check
 print("RESET TO DEFAULT AND ZERO CHECK")
 ser.write(b"*RST\n")
-ser.write(b"SYST:ZCH ON\n")
+ser.write(b"SYST:ZCH OFF\n")
 
 # check device ID
 print("CHECKING DEVICE ID...")
