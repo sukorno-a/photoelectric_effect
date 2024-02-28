@@ -20,7 +20,7 @@ def find_horizontal(voltage,current):
     mean = np.mean(current[:2])
     std = np.std(current[:2])
     for i in range(3,len(current)):
-        if current[i] < std*2:
+        if current[i] < std*3:
             mean = np.mean(current[:i])
             std = np.std(current[:i])
             volr = voltage[i]
@@ -34,10 +34,10 @@ def stopping(v,mean):
     # threshold_mean = np.mean(mean[0:20])
     # threshold_std = np.std(mean[0:20])
     for i, val in enumerate(mean):
-        if val >= (threshold_mean + (10*threshold_std)):
+        if val >= (threshold_mean + (3*threshold_std)):
             stopping_mean = val
             stopping_v = v[i]
-            stopping_err = np.abs(stopping_v-voltage)
+            stopping_err = 0.1
             break
         else:
             pass
@@ -45,13 +45,27 @@ def stopping(v,mean):
 
 # don't change anything below, just the "stopping" function above
 
+# filter(function, iterable)s = [["Yellow.csv","Green.csv","Blue.csv","Red.csv","VA.csv","Violet_B_1.csv"], # excel files 
+#           [577.85e-9, 546.85e-9, 366.59e-9, 690.53e-9, 406.73e-9, 434.75e-9], # peak wavelengths
+#           [9.13e-9, 10.33e-9, 5.94e-9, 9.32e-9, 9.63e-9, 8.59e-9]] # FWHM
+
+# filters = [["Yellow.csv","Green.csv","Blue.csv","VA.csv","Violet_B_1.csv"], # excel files 
+#           [577.85e-9, 546.85e-9, 366.59e-9, 406.73e-9, 434.75e-9], # peak wavelengths
+#           [9.13e-9, 10.33e-9, 5.94e-9, 9.63e-9, 8.59e-9], # FWHM
+#           ["Orange", "Green", "Blue","Violet", "Purple"], # Colours
+#           ["Yellow", "Green", "Blue", "Violet A", "Violet B"]] # Colours
+
 filters = [["Yellow.csv","Green.csv","Blue.csv","Red.csv","VA.csv","Violet_B_1.csv"], # excel files 
           [577.85e-9, 546.85e-9, 366.59e-9, 690.53e-9, 406.73e-9, 434.75e-9], # peak wavelengths
-          [9.13e-9, 10.33e-9, 5.94e-9, 9.32e-9, 9.63e-9, 8.59e-9]] # FWHM
+          [9.13e-9, 10.33e-9, 5.94e-9, 9.32e-9, 9.63e-9, 8.59e-9], # FWHM
+          ["Orange", "Green", "Blue", "Red", "Violet", "Purple"], # Colours
+          ["Yellow", "Green", "Blue", "Red", "Violet A", "Violet B"]] # Colours
 
-# filters = [["Yellow.csv","Green.csv","Red.csv","VA.csv","Violet_B_1.csv"], # excel files 
-#          [577.85, 546.85, 690.53, 406.73, 434.75], # peak wavelengths
-#          [9.13, 10.33, 9.32, 9.63, 8.59]] # FWHM
+# filters = [["Yellow.csv","Green.csv","VA.csv","Violet_B_1.csv"], # excel files 
+#           [577.85e-9, 546.85e-9, 406.73e-9, 434.75e-9], # peak wavelengths
+#           [9.13e-9, 10.33e-9, 9.63e-9, 8.59e-9], # FWHM
+#           ["Orange", "Green", "Violet", "Purple"], # Colours
+#           ["Yellow", "Green", "Violet A", "Violet B"]] # Colours
 
 plt.figure()
 
@@ -93,15 +107,29 @@ params = stats.linregress(freqs,ke_max)
 slope = params[0]
 error = params[4]
 intercept = params[1]
+x_intercept = -intercept/slope
 
-plt.figure()
-plt.errorbar(freqs,ke_max,yerr=stopping_errors*e,xerr=freqs_err,fmt=".",capsize=3,label="Data")
-plt.plot(freqs,(freqs*slope)+intercept,label="Linear Fit")
-plt.plot(x_test,y_test)
-plt.xlabel("Frequency (Hz)")
-plt.ylabel("Max. KE (J)")
-plt.title("KE against freq.")
-plt.legend()
+x_upper=np.linspace(x_intercept,9e14,100)
+x_lower=np.linspace(0,x_intercept,100)
+
+fig, ax = plt.subplots(figsize=(10,6))
+ax.errorbar(freqs,ke_max,yerr=stopping_errors*e,xerr=freqs_err,fmt=".",capsize=3,label="Data")
+ax.plot(x_upper,(x_upper*slope)+intercept,color="Orange",label="Linear Fit")
+ax.plot(x_lower,(x_lower*slope)+intercept,"--",color="Orange")
+ax.axis(True)
+ax.plot(x_test,y_test)
+sns.set(style="ticks")
+ax.axhline(y=0, color='k')
+ax.grid(True, which='both')
+ax.margins(x=0)
+
+plt.xlabel("Frequency (Hz)",size=20)
+plt.ylabel("Max. KE (J)",size=20)
+plt.title("KE against freq.", size=24)
+plt.legend(fancybox=True, shadow=True, prop={'size': 18})
+plt.xticks(size=18,color='#4f4e4e')
+plt.yticks(size=18,color='#4f4e4e')
+sns.set(style='whitegrid')
 plt.show()
 
 print("Obtained value of h:",slope,'+-',error)
