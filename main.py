@@ -15,23 +15,25 @@ def read_in(file):
     return v, i_mean, i_std
 
 # very rudimentary method to extract stopping voltages
-def stopping(v,mean):
-    threshold_mean = np.mean(mean[0:20])
-    threshold_std = np.std(mean[0:20])
-    for i, val in enumerate(mean):
-        if val >= (threshold_mean + (5*threshold_std)):
-            stopping_mean = val
+def stopping(v,current):
+    print("Sukorno sucks")
+    thresh_current = np.mean(current[0:10])
+    thresh_current_std = np.std(current[0:10])
+    for i, val in enumerate(current):
+        if val >= (thresh_current + (3*thresh_current_std)):
+            stopping_current = val
             stopping_v = v[i]
             break
         else:
             pass
-    return stopping_v,stopping_mean
+    return stopping_v,stopping_current
 
 # don't change anything below, just the "stopping" function above
 
-filters = [["Yellow.csv","Green.csv","Blue.csv","Red.csv","VA.csv","Violet_B_1.csv"], # excel files 
-         [577.85, 546.85, 366.59, 690.53, 406.73, 434.75], # peak wavelengths
-         [9.13, 10.33, 5.94, 9.32, 9.63, 8.59]] # FWHM
+filters = [["Yellow.csv","Green.csv","VA.csv","Violet_B_1.csv"], # excel files 
+          [577.85e-9, 546.85e-9, 406.73e-9, 434.75e-9], # peak wavelengths
+          [9.13e-9, 10.33e-9, 9.63e-9, 8.59e-9], # FWHM
+          ["gold","green","mediumvioletred","blueviolet"]] 
 
 plt.figure()
 
@@ -43,20 +45,21 @@ e = 1.6e-19
 # extract stopping voltages and plot as points on IV curves
 
 for i,file in enumerate(filters[0]):
-    v,mean,std = read_in(file)
-    plt.plot(v,mean,marker="x")
+    v,current,current_std = read_in(file)
+    # plt.plot(v,current,marker="x",color=filters[3][i])
 
-    stopping_v,stopping_mean = stopping(v,mean)
-    plt.plot(stopping_v,stopping_mean,marker="d")
-    plt.errorbar(v,mean,std)
+    stopping_v,stopping_current = stopping(v,current)
+    plt.plot(stopping_v,stopping_current,marker="d",color=filters[3][i],ms=8)
+    plt.errorbar(v,current,current_std,marker="x",color=filters[3][i])
 
-    ke_max = np.append(ke_max,stopping_mean*e)
+    ke_max = np.append(ke_max,-stopping_v*e)
     freqs = np.append(freqs,c/(filters[1][i]))
 
 plt.xlabel("Voltage (V)")
 plt.ylabel("Current (uA)")
 plt.title("IV graph")
 plt.show()
+print("Zosia is the best :)")
 
 params = stats.linregress(freqs,ke_max)
 slope = params[0]
