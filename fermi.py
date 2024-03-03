@@ -9,7 +9,7 @@ import scipy as sp
 import matplotlib.pyplot as plt
 import pandas as pd
 
-def fermi_dirac(E,Ef,max_curr,kbT,adjust):
+def fermi_dirac(E,Ef,max_curr,kbT):
     return(max_curr*(1-(1/(np.exp((E-Ef)/kbT)+1))))
 
 filters = [["Yellow.csv","Green.csv","Blue.csv","VA.csv","Violet_B_1.csv"], # excel files 
